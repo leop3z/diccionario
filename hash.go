@@ -50,27 +50,23 @@ func hashing(b []byte) uint64 {
 
 func buscar[K comparable, V any](clave any, tabla []celdaHash[K, V]) uint64 {
 	pos := hashing(convertirABytes(clave)) % uint64(len(tabla))
-	for !(tabla[pos].estado == VACIO || tabla[pos].clave == clave) {
-		if int(pos) == len(tabla)-1 {
-			pos = 0
-		} else {
-			pos++
-		}
+	for tabla[pos].estado != VACIO && tabla[pos].clave != clave {
+		pos = (pos + 1) % uint64(len(tabla))
 	}
 	return pos
 }
 
-func (hash *hashCerrado[K, V]) redimensionar(nuevo_tam int) {
-	hash.tam = nuevo_tam
-	nueva := make([]celdaHash[K, V], nuevo_tam)
-	for i := range hash.tabla {
-		if hash.tabla[i].estado == OCUPADO {
-			pos := buscar(hash.tabla[i].clave, nueva)
-			nueva[pos] = hash.tabla[i]
+func (hash *hashCerrado[K, V]) redimensionar(nuevoTam int) {
+	nueva := make([]celdaHash[K, V], nuevoTam)
+	for _, celda := range hash.tabla {
+		if celda.estado == OCUPADO {
+			pos := buscar(celda.clave, nueva)
+			nueva[pos] = celda
 		}
 	}
-	hash.borrados = 0
 	hash.tabla = nueva
+	hash.tam = nuevoTam
+	hash.borrados = 0
 }
 
 func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
@@ -80,6 +76,7 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 	}
 	pos := buscar(clave, hash.tabla)
 	hash.tabla[pos].dato = dato
+
 	if !hash.Pertenece(clave) {
 		hash.tabla[pos].clave = clave
 		hash.tabla[pos].estado = OCUPADO
@@ -120,12 +117,10 @@ func (hash hashCerrado[K, V]) Cantidad() int {
 }
 
 func (hash *hashCerrado[K, V]) Iterar(visitar func(K, V) bool) {
-	pos := 0
-	for pos < len(hash.tabla) {
-		if hash.tabla[pos].estado == OCUPADO && !visitar(hash.tabla[pos].clave, hash.tabla[pos].dato) {
+	for _, celda := range hash.tabla {
+		if celda.estado == OCUPADO && !visitar(celda.clave, celda.dato) {
 			break
 		}
-		pos++
 	}
 }
 
@@ -143,7 +138,7 @@ func (hash *hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
 }
 
 func (iter iteradorHash[K, V]) HaySiguiente() bool {
-	return iter.pos_actual < len(iter.tabla)
+	return iter.pos_actual < len(iter.tabla) && iter.tabla[iter.pos_actual].estado == OCUPADO
 }
 
 func (iter iteradorHash[K, V]) VerActual() (K, V) {
