@@ -138,7 +138,7 @@ func (hash *hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
 }
 
 func (iter iteradorHash[K, V]) HaySiguiente() bool {
-	return iter.pos_actual < len(iter.tabla) && iter.tabla[iter.pos_actual].estado == OCUPADO
+	return iter.pos_actual < len(iter.tabla)
 }
 
 func (iter iteradorHash[K, V]) VerActual() (K, V) {
