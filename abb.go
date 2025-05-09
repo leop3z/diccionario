@@ -24,19 +24,18 @@ func CrearABB[K comparable, V any](funcion_cmp func(K, K) int) DiccionarioOrdena
 }
 
 func (abb *abbDiccionario[K, V]) guardarRecursivo(nodo *nodoArbol[K, V], clave_nueva K, dato V) *nodoArbol[K, V] {
-	// Mi arbol esta vacio
-	if abb == nil {
+	if nodo == nil {
+		abb.cantidad++
 		return &nodoArbol[K, V]{clave: clave_nueva, dato: dato}
 	}
 	comparacion := abb.cmp(clave_nueva, nodo.clave)
-	if comparacion == PRIMERA_ES_MENOR {
+	if comparacion > 0 {
 		nodo.hijo_izq = abb.guardarRecursivo(nodo.hijo_izq, clave_nueva, dato)
-	} else if comparacion == SEGUNDA_ES_MENOR {
+	} else if comparacion < 0 {
 		nodo.hijo_der = abb.guardarRecursivo(nodo.hijo_der, clave_nueva, dato)
 	} else {
 		nodo.dato = dato
 	}
-	abb.cantidad++
 	return nodo
 }
 
@@ -45,19 +44,43 @@ func (abb *abbDiccionario[K, V]) Guardar(clave K, dato V) {
 }
 
 func (abb *abbDiccionario[K, V]) busquedaRecursiva(nodo *nodoArbol[K, V], clave K) bool {
-	return clave == nodo.clave
+	if nodo == nil {
+		return false
+	}
+	comparacion := abb.cmp(clave, nodo.clave)
+	if comparacion < 0 {
+		return abb.busquedaRecursiva(nodo.hijo_izq, clave)
+	} else if comparacion > 0 {
+		return abb.busquedaRecursiva(nodo.hijo_der, clave)
+	} else {
+		return true
+	}
+}
+
+func (abb *abbDiccionario[K, V]) obtenerNodo(nodo *nodoArbol[K, V], clave K) *nodoArbol[K, V] {
+	comparacion := abb.cmp(clave, abb.raiz.clave)
+
+	if comparacion < 0 {
+		return abb.obtenerNodo(nodo.hijo_izq, clave)
+	} else if comparacion > 0 {
+		return abb.obtenerNodo(nodo.hijo_der, clave)
+	}
+	return nodo
 }
 
 func (abb *abbDiccionario[K, V]) Pertenece(clave K) bool {
-	return abb.raiz.clave == clave
+	return abb.busquedaRecursiva(abb.raiz, clave)
 }
 
-func (hash *abbDiccionario[K, V]) Obtener(clave K) V {
-	var dato V
-	return dato
+func (abb *abbDiccionario[K, V]) Obtener(clave K) V {
+	nodo := abb.obtenerNodo(abb.raiz, clave)
+	if nodo == nil {
+		panic("La clave no pertenece al diccionario")
+	}
+	return nodo.dato
 }
 
-func (hash *abbDiccionario[K, V]) Borrar(clave K) V {
+func (abb *abbDiccionario[K, V]) Borrar(clave K) V {
 	var dato V
 	return dato
 }
