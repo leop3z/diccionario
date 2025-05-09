@@ -12,8 +12,16 @@ func compararLongitud(clave1 string, clave2 string) int {
 }
 
 func TestDiccionarioVacio(t *testing.T) {
-	abb := diccionario.CrearABB[string, string](compararLongitud)
-	require.Equal(t, abb.Cantidad(), 0, "Como recien se creo el arbol no tiene elementos")
-	abb.Guardar("Mordecai", "Azul")
-	require.Equal(t, abb.Cantidad(), 1, "El arbol ya no está vacío")
+	t.Log("Comprueba que Diccionario vacio no tiene claves")
+	dic := diccionario.CrearABB[string, string](compararLongitud)
+	require.EqualValues(t, 0, dic.Cantidad())
+	require.False(t, dic.Pertenece("A"))
+	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener("A") })
+	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Borrar("A") })
+}
+func TestObtenerDato(t *testing.T) {
+	abb := diccionario.CrearABB[string, int](compararLongitud)
+	abb.Guardar("Don Quijote", 34)
+	abb.Guardar("Rosinante", 11)
+	require.Equal(t, 34, abb.Obtener("Don Quijote"), "Busca el valor de la clave dada")
 }
