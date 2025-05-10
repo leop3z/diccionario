@@ -29,9 +29,9 @@ func (abb *abbDiccionario[K, V]) guardarRecursivo(nodo *nodoArbol[K, V], clave_n
 		return &nodoArbol[K, V]{clave: clave_nueva, dato: dato}
 	}
 	comparacion := abb.cmp(clave_nueva, nodo.clave)
-	if comparacion > 0 {
+	if comparacion < 0 {
 		nodo.hijo_izq = abb.guardarRecursivo(nodo.hijo_izq, clave_nueva, dato)
-	} else if comparacion < 0 {
+	} else if comparacion > 0 {
 		nodo.hijo_der = abb.guardarRecursivo(nodo.hijo_der, clave_nueva, dato)
 	} else {
 		nodo.dato = dato
@@ -57,8 +57,15 @@ func (abb *abbDiccionario[K, V]) busquedaRecursiva(nodo *nodoArbol[K, V], clave 
 	}
 }
 
+func (abb *abbDiccionario[K, V]) Pertenece(clave K) bool {
+	return abb.busquedaRecursiva(abb.raiz, clave)
+}
+
 func (abb *abbDiccionario[K, V]) obtenerNodo(nodo *nodoArbol[K, V], clave K) *nodoArbol[K, V] {
-	comparacion := abb.cmp(clave, abb.raiz.clave)
+	if nodo == nil {
+		return nil
+	}
+	comparacion := abb.cmp(clave, nodo.clave)
 
 	if comparacion < 0 {
 		return abb.obtenerNodo(nodo.hijo_izq, clave)
@@ -66,10 +73,6 @@ func (abb *abbDiccionario[K, V]) obtenerNodo(nodo *nodoArbol[K, V], clave K) *no
 		return abb.obtenerNodo(nodo.hijo_der, clave)
 	}
 	return nodo
-}
-
-func (abb *abbDiccionario[K, V]) Pertenece(clave K) bool {
-	return abb.busquedaRecursiva(abb.raiz, clave)
 }
 
 func (abb *abbDiccionario[K, V]) Obtener(clave K) V {
@@ -84,8 +87,7 @@ func (abb *abbDiccionario[K, V]) Obtener(clave K) V {
 
 func (abb *abbDiccionario[K, V]) borrarRec(nodo *nodoArbol[K, V], clave K) (*nodoArbol[K, V], V) {
 	if nodo == nil {
-		var sin_hoja V
-		return nil, sin_hoja
+		panic("El arbol esta vacio")
 	}
 	comparacion := abb.cmp(clave, nodo.clave)
 	var dato V
@@ -125,9 +127,7 @@ func (abb *abbDiccionario[K, V]) buscarMin(nodo *nodoArbol[K, V]) *nodoArbol[K, 
 }
 
 func (abb *abbDiccionario[K, V]) Borrar(clave K) V {
-	var (
-		dato V
-	)
+	var dato V
 	abb.raiz, dato = abb.borrarRec(abb.raiz, clave)
 	return dato
 }
@@ -141,8 +141,7 @@ func (abb *abbDiccionario[K, V]) Cantidad() int {
 func (abb *abbDiccionario[K, V]) Iterar(visitar func(clave1 K, dato V) bool) {
 }
 
-type iteradorDiccionario[K comparable, V any] struct {
-}
+type iteradorDiccionario[K comparable, V any] struct{}
 
 func (abb *abbDiccionario[K, V]) Iterador() IterDiccionario[K, V] {
 	return iteradorDiccionario[K, V]{}
@@ -153,7 +152,6 @@ func (abb iteradorDiccionario[K, V]) HaySiguiente() bool {
 }
 
 func (abb iteradorDiccionario[K, V]) Siguiente() {
-
 }
 
 func (abb iteradorDiccionario[K, V]) VerActual() (K, V) {
