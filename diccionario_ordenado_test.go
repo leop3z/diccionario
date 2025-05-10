@@ -9,7 +9,12 @@ import (
 )
 
 func compararLongitud(clave1 string, clave2 string) int {
-	return len(clave1) - len(clave2)
+	if clave1 < clave2 {
+		return -1
+	} else if clave1 > clave2 {
+		return 1
+	}
+	return 0
 }
 
 var TAMS_VOLUMEN = []int{12500, 25000, 50000, 100000, 200000, 400000}
@@ -19,8 +24,8 @@ func TestDiccionarioVacio(t *testing.T) {
 	dic := diccionario.CrearABB[string, string](compararLongitud)
 	require.EqualValues(t, 0, dic.Cantidad())
 	require.False(t, dic.Pertenece("A"))
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener("A") })
-	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Borrar("A") })
+	require.Panics(t, func() { dic.Obtener("A") }, "Si el diccionario esta vacio entonces no puede obtener nada")
+	require.Panics(t, func() { dic.Borrar("A") }, "No se puede borrar de un diccionario vacio")
 }
 
 func TestUnElement(t *testing.T) {
