@@ -43,18 +43,17 @@ func (abb *abbDiccionario[K, V]) Guardar(clave K, dato V) {
 	abb.raiz = abb.guardarRecursivo(abb.raiz, clave, dato)
 }
 
-func (abb *abbDiccionario[K, V]) busquedaRecursiva(nodo *nodoArbol[K, V], clave K) bool {
+func (abb *abbDiccionario[K, V]) busquedaRecursiva(nodo *nodoArbol[K, V], clave K) *nodoArbol[K, V] {
 	if nodo == nil {
-		return false
+		return nil
 	}
 	comparacion := abb.cmp(clave, nodo.clave)
 	if comparacion < 0 {
 		return abb.busquedaRecursiva(nodo.hijo_izq, clave)
 	} else if comparacion > 0 {
 		return abb.busquedaRecursiva(nodo.hijo_der, clave)
-	} else {
-		return true
 	}
+	return nodo
 }
 
 func (abb *abbDiccionario[K, V]) obtenerNodo(nodo *nodoArbol[K, V], clave K) *nodoArbol[K, V] {
@@ -72,7 +71,7 @@ func (abb *abbDiccionario[K, V]) obtenerNodo(nodo *nodoArbol[K, V], clave K) *no
 }
 
 func (abb *abbDiccionario[K, V]) Pertenece(clave K) bool {
-	return abb.busquedaRecursiva(abb.raiz, clave)
+	return abb.busquedaRecursiva(abb.raiz, clave) != nil
 }
 
 func (abb *abbDiccionario[K, V]) Obtener(clave K) V {
