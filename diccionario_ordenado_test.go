@@ -2,26 +2,22 @@ package diccionario_test
 
 import (
 	"fmt"
+	"strings"
 	"tdas/diccionario"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-func compararLongitud(clave1 string, clave2 string) int {
-	if clave1 < clave2 {
-		return -1
-	} else if clave1 > clave2 {
-		return 1
-	}
-	return 0
+func funcComparacion(clave1 string, clave2 string) int {
+	return strings.Compare(clave1, clave2)
 }
 
 var TAMS_VOLUMEN = []int{12500, 25000, 50000, 100000, 200000, 400000}
 
 func TestDiccionarioVacio(t *testing.T) {
 	t.Log("Comprueba que Diccionario vacio no tiene claves")
-	dic := diccionario.CrearABB[string, string](compararLongitud)
+	dic := diccionario.CrearABB[string, string](funcComparacion)
 	require.EqualValues(t, 0, dic.Cantidad())
 	require.False(t, dic.Pertenece("A"))
 	require.Panics(t, func() { dic.Obtener("A") }, "Si el diccionario esta vacio entonces no puede obtener nada")
@@ -30,7 +26,7 @@ func TestDiccionarioVacio(t *testing.T) {
 
 func TestUnElement(t *testing.T) {
 	t.Log("Comprueba que Diccionario con un elemento tiene esa Clave, unicamente")
-	dic := diccionario.CrearABB[string, int](compararLongitud)
+	dic := diccionario.CrearABB[string, int](funcComparacion)
 	dic.Guardar("A", 10)
 	require.EqualValues(t, 1, dic.Cantidad())
 	require.True(t, dic.Pertenece("A"))
@@ -50,14 +46,11 @@ func TestDiccionarioGuardar(t *testing.T) {
 	claves := []string{clave1, clave2, clave3}
 	valores := []string{valor1, valor2, valor3}
 
-	dic := diccionario.CrearABB[string, string](compararLongitud)
-	require.False(t, dic.Pertenece(claves[0]))
+	dic := diccionario.CrearABB[string, string](funcComparacion)
 	require.False(t, dic.Pertenece(claves[0]))
 	dic.Guardar(claves[0], valores[0])
 	require.EqualValues(t, 1, dic.Cantidad())
 	require.True(t, dic.Pertenece(claves[0]))
-	require.True(t, dic.Pertenece(claves[0]))
-	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
 	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
 
 	require.False(t, dic.Pertenece(claves[1]))
@@ -84,7 +77,7 @@ func TestReemplazoDato(t *testing.T) {
 	t.Log("Guarda un par de claves, y luego vuelve a guardar, buscando que el dato se haya reemplazado")
 	clave := "Gato"
 	clave2 := "Perro"
-	dic := diccionario.CrearABB[string, string](compararLongitud)
+	dic := diccionario.CrearABB[string, string](funcComparacion)
 	dic.Guardar(clave, "miau")
 	dic.Guardar(clave2, "guau")
 	require.True(t, dic.Pertenece(clave))
@@ -113,7 +106,7 @@ func TestDiccionarioBorrar(t *testing.T) {
 	valor3 := "moo"
 	claves := []string{clave1, clave2, clave3}
 	valores := []string{valor1, valor2, valor3}
-	dic := diccionario.CrearABB[string, string](compararLongitud)
+	dic := diccionario.CrearABB[string, string](funcComparacion)
 
 	require.False(t, dic.Pertenece(claves[0]))
 	require.False(t, dic.Pertenece(claves[0]))
@@ -143,9 +136,7 @@ func TestDiccionarioBorrar(t *testing.T) {
 }
 
 func TestReutlizacionDeBorrados(t *testing.T) {
-	t.Log("Prueba de caja blanca: revisa, para el caso que fuere un HashCerrado, que no haya problema " +
-		"reinsertando un elemento borrado")
-	dic := diccionario.CrearABB[string, string](compararLongitud)
+	dic := diccionario.CrearABB[string, string](funcComparacion)
 	clave := "hola"
 	dic.Guardar(clave, "mundo!")
 	dic.Borrar(clave)
@@ -159,7 +150,7 @@ func TestReutlizacionDeBorrados(t *testing.T) {
 
 func TestClaveVacia(t *testing.T) {
 	t.Log("Guardamos una clave vacía (i.e. \"\") y deberia funcionar sin problemas")
-	dic := diccionario.CrearABB[string, string](compararLongitud)
+	dic := diccionario.CrearABB[string, string](funcComparacion)
 	clave := ""
 	dic.Guardar(clave, clave)
 	require.True(t, dic.Pertenece(clave))
@@ -170,11 +161,11 @@ func TestClaveVacia(t *testing.T) {
 func TestCadenaLargaParticular(t *testing.T) {
 	t.Log("Se han visto casos problematicos al utilizar la funcion de hashing de K&R, por lo que " +
 		"se agrega una prueba con dicha funcion de hashing y una cadena muy larga")
-	//El caracter '~' es el de mayor valor en ASCII (126).
+	// El caracter '~' es el de mayor valor en ASCII (126).
 	claves := make([]string, 10)
 	cadena := "%d~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
 		"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	dic := diccionario.CrearABB[string, string](compararLongitud)
+	dic := diccionario.CrearABB[string, string](funcComparacion)
 	valores := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"}
 	for i := 0; i < 10; i++ {
 		claves[i] = fmt.Sprintf(cadena, i)

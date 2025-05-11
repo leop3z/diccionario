@@ -68,13 +68,55 @@ func (abb *abbDiccionario[K, V]) Obtener(clave K) V {
 	return nodo.dato
 }
 
-// Casos: sin hojas, 1 hoja, 2 hojas.
+// Funcion para buscar el minimo del sub-arbol derecho
+func (abb *abbDiccionario[K, V]) buscarMinimo(nodo *nodoArbol[K, V]) *nodoArbol[K, V] {
+	for nodo != nil && nodo.hijo_izq != nil {
+		nodo = nodo.hijo_izq
+	}
+	return nodo
+}
 
-func (abb *abbDiccionario[K, V]) Borrar(clave K) V {
-	if !abb.Pertenece(clave) {
+// Recorre recursivamente el arbol xq debe ir actualizando los punteros
+func (abb *abbDiccionario[K, V]) borrarNodo(nodo *nodoArbol[K, V], clave K) (*nodoArbol[K, V], V) {
+	if nodo == nil {
 		panic("La clave no pertenece al diccionario")
 	}
-	var dato V
+
+	comparacion := abb.cmp(clave, nodo.clave)
+	if comparacion < 0 {
+		var valor V
+		nodo.hijo_izq, valor = abb.borrarNodo(nodo.hijo_izq, clave)
+		return nodo, valor
+	} else if comparacion > 0 {
+		var valor V
+		nodo.hijo_der, valor = abb.borrarNodo(nodo.hijo_der, clave)
+		return nodo, valor
+	}
+
+	dato_original := nodo.dato
+	abb.cantidad--
+	// No tiene hijos
+	if nodo.hijo_izq == nil && nodo.hijo_der == nil {
+		return nil, dato_original
+	}
+	// tiene un hijo
+	if nodo.hijo_izq == nil {
+		return nodo.hijo_der, dato_original
+	}
+	if nodo.hijo_der == nil {
+		return nodo.hijo_izq, dato_original
+	}
+	// tiene 2 hijos
+	sucesor := abb.buscarMinimo(nodo.hijo_der)
+	nodo.clave = sucesor.clave
+	nodo.dato = sucesor.dato
+	nodo.hijo_der, _ = abb.borrarNodo(nodo.hijo_der, sucesor.clave)
+	return nodo, dato_original
+}
+
+func (abb *abbDiccionario[K, V]) Borrar(clave K) V {
+	nueva_raiz, dato := abb.borrarNodo(abb.raiz, clave)
+	abb.raiz = nueva_raiz
 	return dato
 }
 
@@ -115,3 +157,13 @@ func (abb *abbDiccionario[K, V]) IterarRango(desde *K, hasta *K, visitar func(cl
 func (abb *abbDiccionario[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
 	panic("IteradorRango no implementado todavía")
 }
+
+/*
+
+func (abb *abbDiccionario[K,V])borrarNodo(nodo *nodoArbol[K,V], clave K) V{
+	nodo_borrar := abb.buquedaRecursiva(nodo, clave)
+
+	// demas operaciones para manejar los casos de la cantidad de hijos
+}
+
+*/
