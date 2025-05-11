@@ -29,9 +29,9 @@ func (abb *abbDiccionario[K, V]) guardarRecursivo(nodo *nodoArbol[K, V], clave_n
 		return &nodoArbol[K, V]{clave: clave_nueva, dato: dato}
 	}
 	comparacion := abb.cmp(clave_nueva, nodo.clave)
-	if comparacion > 0 {
+	if comparacion < 0 {
 		nodo.hijo_izq = abb.guardarRecursivo(nodo.hijo_izq, clave_nueva, dato)
-	} else if comparacion < 0 {
+	} else if comparacion > 0 {
 		nodo.hijo_der = abb.guardarRecursivo(nodo.hijo_der, clave_nueva, dato)
 	} else {
 		nodo.dato = dato
@@ -56,26 +56,12 @@ func (abb *abbDiccionario[K, V]) busquedaRecursiva(nodo *nodoArbol[K, V], clave 
 	return nodo
 }
 
-func (abb *abbDiccionario[K, V]) obtenerNodo(nodo *nodoArbol[K, V], clave K) *nodoArbol[K, V] {
-	if nodo == nil {
-		return nil
-	}
-	comparacion := abb.cmp(clave, nodo.clave)
-
-	if comparacion < 0 {
-		return abb.obtenerNodo(nodo.hijo_izq, clave)
-	} else if comparacion > 0 {
-		return abb.obtenerNodo(nodo.hijo_der, clave)
-	}
-	return nodo
-}
-
 func (abb *abbDiccionario[K, V]) Pertenece(clave K) bool {
 	return abb.busquedaRecursiva(abb.raiz, clave) != nil
 }
 
 func (abb *abbDiccionario[K, V]) Obtener(clave K) V {
-	nodo := abb.obtenerNodo(abb.raiz, clave)
+	nodo := abb.busquedaRecursiva(abb.raiz, clave)
 	if nodo == nil {
 		panic("La clave no pertenece al diccionario")
 	}
@@ -85,10 +71,10 @@ func (abb *abbDiccionario[K, V]) Obtener(clave K) V {
 // Casos: sin hojas, 1 hoja, 2 hojas.
 
 func (abb *abbDiccionario[K, V]) Borrar(clave K) V {
-	var dato V
-	if abb.cantidad == 0 {
-		panic("El arbol esta vacio")
+	if !abb.Pertenece(clave) {
+		panic("La clave no pertenece al diccionario")
 	}
+	var dato V
 	return dato
 }
 
